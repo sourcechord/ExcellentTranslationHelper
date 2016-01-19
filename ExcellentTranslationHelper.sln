@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcellentTranslationHelper", "ExcellentTranslationHelper\ExcellentTranslationHelper.csproj", "{90AA1B05-1DE6-4A48-8E40-3658DF734DEF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B0CF29A3-3D3C-4497-9795-D2B2921D934D} = {B0CF29A3-3D3C-4497-9795-D2B2921D934D}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataConverter", "DataConverter\DataConverter.csproj", "{B0CF29A3-3D3C-4497-9795-D2B2921D934D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{90AA1B05-1DE6-4A48-8E40-3658DF734DEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90AA1B05-1DE6-4A48-8E40-3658DF734DEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90AA1B05-1DE6-4A48-8E40-3658DF734DEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90AA1B05-1DE6-4A48-8E40-3658DF734DEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0CF29A3-3D3C-4497-9795-D2B2921D934D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0CF29A3-3D3C-4497-9795-D2B2921D934D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0CF29A3-3D3C-4497-9795-D2B2921D934D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0CF29A3-3D3C-4497-9795-D2B2921D934D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

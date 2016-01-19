@@ -1,0 +1,67 @@
+﻿<Window x:Class="Excellent.TranslationHelper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:Excellent.TranslationHelper"
+        Title="MainWindow"
+        Width="525"
+        Height="200"
+        MinWidth="400"
+        MinHeight="150">
+    <Window.DataContext>
+        <local:MainWindowViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <ObjectDataProvider x:Key="ConvertTypes" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:ConvertType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <!-- JSON to xlsx / xlsx to JSONの切り替え -->
+        <ComboBox HorizontalAlignment="Left" Margin="10" VerticalAlignment="Top" Width="120"
+                  SelectedItem="{Binding SelectedType}"
+                  ItemsSource="{Binding Source={StaticResource ConvertTypes}}"/>
+
+        <!--  変換元  -->
+        <Grid Grid.Column="1" Margin="10">
+            <TextBox Height="23"
+                     Margin="0,0,80,0"
+                     HorizontalAlignment="Stretch"
+                     VerticalAlignment="Top"
+                     Text="{Binding SourcePath}"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap" />
+            <Button Width="75"
+                    Margin="0,2,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Command="{Binding SelectSourceCommand}"
+                    Content="Open" />
+
+        </Grid>
+
+
+        <!--  変換先  -->
+        <Button Grid.Row="1"
+                Grid.Column="1"
+                Width="75"
+                Margin="10"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Command="{Binding ConvertCommand}"
+                Content="Convert" />
+        
+
+    </Grid>
+</Window>
