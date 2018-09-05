@@ -12,9 +12,14 @@
         <local:MainWindowViewModel />
     </Window.DataContext>
     <Window.Resources>
-        <ObjectDataProvider x:Key="ConvertTypes" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider x:Key="InputTypes" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="local:ConvertType" />
+                <x:Type TypeName="local:InputType" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="OutputTypes" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:OutputType" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
     </Window.Resources>
@@ -28,10 +33,10 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <!-- JSON to xlsx / xlsx to JSONの切り替え -->
+        <!-- 入力フォーマットの切り替え -->
         <ComboBox HorizontalAlignment="Left" Margin="10" VerticalAlignment="Top" Width="120"
-                  SelectedItem="{Binding SelectedType}"
-                  ItemsSource="{Binding Source={StaticResource ConvertTypes}}"/>
+                  SelectedItem="{Binding InputType}"
+                  ItemsSource="{Binding Source={StaticResource InputTypes}}"/>
 
         <!--  変換元  -->
         <Grid Grid.Column="1" Margin="10">
@@ -53,14 +58,23 @@
 
 
         <!--  変換先  -->
-        <Button Grid.Row="1"
+        <!-- 出力フォーマットの切り替え -->
+        <StackPanel Grid.Row="1"
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom">
+            <ComboBox HorizontalAlignment="Left" Margin="10" VerticalAlignment="Top" Width="120"
+                  SelectedItem="{Binding OutputType}"
+                  ItemsSource="{Binding Source={StaticResource OutputTypes}}"/>
+            <Button Grid.Row="1"
                 Grid.Column="1"
                 Width="75"
                 Margin="10"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
                 Command="{Binding ConvertCommand}"
                 Content="Convert" />
+        </StackPanel>
+
         
 
     </Grid>

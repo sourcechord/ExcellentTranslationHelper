@@ -9,10 +9,19 @@ using System.Threading.Tasks;
 
 namespace Excellent.TranslationHelper
 {
-    public enum ConvertType
+
+    public enum InputType
     {
-        JsonToXlsx,
-        XlsxToJson,
+        Json,
+        Xlsx,
+        Resx,
+    }
+
+    public enum OutputType
+    {
+        Json,
+        Xlsx,
+        Resx,
     }
 
     class MainWindowViewModel : BindableBase
@@ -20,6 +29,8 @@ namespace Excellent.TranslationHelper
         #region 各種ダイアログ用のメッセージ定義
 
         #endregion
+
+        private TranslationData _translationData;
 
         private string sourcePath;
         /// <summary>
@@ -40,25 +51,28 @@ namespace Excellent.TranslationHelper
         }
 
 
-        private ConvertType selectedType;
+        private InputType inputType;
+        public InputType InputType
+        {
+            get { return inputType; }
+            set { this.SetProperty(ref this.inputType, value); OnInputTypeChanged(); }
+        }
+
         /// <summary>
-        /// 変換処理のタイプを取得または設定します。
+        /// InputTypeプロパティ更新時の処理
         /// </summary>
-        public ConvertType SelectedType
+        private void OnInputTypeChanged()
         {
-            get { return selectedType; }
-            set { this.SetProperty(ref this.selectedType, value); OnSelectedTypeChanged(); }
-        }
-
-        private void OnSelectedTypeChanged()
-        {
-            // 変換タイプを変更されたので、
-            // 変換元のパスをクリアする。
             this.SourcePath = string.Empty;
-
         }
 
 
+        private OutputType outputType;
+        public OutputType OutputType
+        {
+            get { return outputType; }
+            set { this.SetProperty(ref this.outputType, value); }
+        }
 
 
         private RelayCommand selectSourceCommand;
@@ -69,18 +83,38 @@ namespace Excellent.TranslationHelper
         private void SelectSource()
         {
             // コンボボックスの選択状態に合わせて
-            // 変換元を、フォルダ選択/xlsxファイル選択、のどちらかに切り替える
-            switch (this.SelectedType)
+            // 変換元選択処理を、フォルダ選択/xlsxファイル選択、のどちらかに切り替える
+            switch (this.InputType)
             {
-                case ConvertType.JsonToXlsx:
+                case InputType.Json:
+                case InputType.Resx:
                     this.SelectDirectory();
                     break;
-                case ConvertType.XlsxToJson:
+                case InputType.Xlsx:
                     this.SelectXlsxFile();
                     break;
                 default:
                     break;
             }
+
+            // 指定されたソースの情報を読み込む
+            IConverter converter = null;
+            switch (this.InputType)
+            {
+                case InputType.Json:
+                    converter = new JsonConverter();
+                    break;
+                case InputType.Xlsx:
+                    converter = new ExcelConverter();
+                    break;
+                case InputType.Resx:
+                    converter = new ResxConverter();
+                    break;
+                default:
+                    break;
+            }
+
+            this._translationData = converter.Read(this.SourcePath);
         }
 
 
@@ -125,73 +159,71 @@ namespace Excellent.TranslationHelper
         {
             // コンボボックスの選択状態に合わせて
             // 変換先を、フォルダ選択/xlsxファイル選択、のどちらかに切り替える
-            switch (this.SelectedType)
+            var path = string.Empty;
+            switch (this.OutputType)
             {
-                case ConvertType.JsonToXlsx:
-                    this.ConvertToXlsx();
+                case OutputType.Xlsx:
+                {
+                    var dlg = new CommonSaveFileDialog();
+                    dlg.EnsureReadOnly = false;
+                    dlg.Filters.Add(new CommonFileDialogFilter("xlsx files", "*.xlsx"));
+                    dlg.DefaultExtension = ".xlsx";
+                    dlg.AlwaysAppendDefaultExtension = true;    // 必ずデフォルトの拡張子をつけるように制限
+
+                    var result = dlg.ShowDialog();
+                    if (result != CommonFileDialogResult.Ok)
+                    {
+                        return;
+                    }
+
+                    path = dlg.FileName;
                     break;
-                case ConvertType.XlsxToJson:
-                    this.ConvertToJson();
+                }
+                case OutputType.Json:
+                case OutputType.Resx:
+                {
+                    // JSON出力時はフォルダを選択して、そこにlocalesというフォルダを書き出す。
+                    // ⇒保存だけど、CommonOpenFileDialogを使用する。
+                    var dlg = new CommonOpenFileDialog();
+                    dlg.IsFolderPicker = true;
+                    dlg.AllowNonFileSystemItems = false;
+
+                    var result = dlg.ShowDialog();
+                    if (result != CommonFileDialogResult.Ok)
+                    {
+                        return;
+                    }
+
+                    path = dlg.FileName;
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            // 変換処理
+            IConverter converter = null;
+            switch (this.OutputType)
+            {
+                case OutputType.Json:
+                    converter = new JsonConverter();
+                    break;
+                case OutputType.Xlsx:
+                    converter = new ExcelConverter();
+                    break;
+                case OutputType.Resx:
+                    converter = new ResxConverter();
                     break;
                 default:
                     break;
             }
 
+            converter.Write(this._translationData, path);
+
         }
         private bool CanConvert()
         {
             return !string.IsNullOrEmpty(this.sourcePath); 
-        }
-
-
-        private void ConvertToXlsx()
-        {
-            var dlg = new CommonSaveFileDialog();
-            dlg.EnsureReadOnly = false;
-            dlg.Filters.Add(new CommonFileDialogFilter("xlsx files", "*.xlsx"));
-            dlg.DefaultExtension = ".xlsx";
-            dlg.AlwaysAppendDefaultExtension = true;    // 必ずデフォルトの拡張子をつけるように制限
-
-            var result = dlg.ShowDialog();
-            if (result != CommonFileDialogResult.Ok)
-            {
-                return;
-            }
-
-            var path = dlg.FileName;
-
-            // コンバーターを作り、変換する
-            var srcConverter = new JsonConverter();
-            var data = srcConverter.Read(this.SourcePath);
-
-
-            var converter = new ExcelConverter();
-            converter.Write(data, path);
-        }
-
-        private void ConvertToJson()
-        {
-            // JSON出力時はフォルダを選択して、そこにlocalesというフォルダを書き出す。
-            // ⇒保存だけど、CommonOpenFileDialogを使用する。
-            var dlg = new CommonOpenFileDialog();
-            dlg.IsFolderPicker = true;
-            dlg.AllowNonFileSystemItems = false;
-
-            var result = dlg.ShowDialog();
-            if (result != CommonFileDialogResult.Ok)
-            {
-                return;
-            }
-
-            var path = dlg.FileName;
-
-            // コンバーターを作り、変換する
-            var srcConverter = new ExcelConverter();
-            var data = srcConverter.Read(this.SourcePath);
-
-
-            var converter = new JsonConverter();
-            converter.Write(data, path);
         }
     }
 }
