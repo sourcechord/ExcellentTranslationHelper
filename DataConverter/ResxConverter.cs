@@ -56,8 +56,10 @@ namespace Excellent.DataConverter
                 {
                     var key = entry.Key as string;
                     var split = key.Split('_');
-                    var data = split.Length > 1 ? new LocalizationItem(split[0], split[1], (string)entry.Value) :
-                                                  new LocalizationItem(null, split[0], (string)entry.Value);
+                    var ns = split.TakeWhile((item, index) => index < split.Length - 1);
+                    var k = split.Last();
+                    var data = ns.Count() > 0 ? new LocalizationItem(string.Join(".", ns), k, (string)entry.Value) :
+                                                  new LocalizationItem(null, k, (string)entry.Value);
 
                     list.Add(data);
                 }
@@ -95,7 +97,8 @@ namespace Excellent.DataConverter
             {
                 foreach (var item in data)
                 {
-                    resxWriter.AddResource($"{item.Namespace}_{item.Key}", item.Value);
+                    var ns = item.Namespace.Replace('.', '_');
+                    resxWriter.AddResource($"{ns}_{item.Key}", item.Value);
                 }
             }
 
